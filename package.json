@@ -1,0 +1,18 @@
+{
+	"name": "stock-market-checker",
+	"version": "1.0.0",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"dependencies": {
+		"bitvavo": "^1.4.1",
+		"date-fns": "^4.1.0",
+		"node-fetch": "^3.3.2"
+	}
+}
