@@ -12,7 +12,9 @@
 	"description": "",
 	"dependencies": {
 		"bitvavo": "^1.4.1",
+		"cli-table": "^0.3.11",
 		"date-fns": "^4.1.0",
-		"node-fetch": "^3.3.2"
+		"node-fetch": "^3.3.2",
+		"table": "^6.9.0"
 	}
 }
