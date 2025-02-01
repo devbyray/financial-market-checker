@@ -11,6 +11,9 @@ importers:
       bitvavo:
         specifier: ^1.4.1
         version: 1.4.1
+      chalk:
+        specifier: ^5.4.1
+        version: 5.4.1
       cli-table:
         specifier: ^0.3.11
         version: 0.3.11
@@ -20,6 +23,9 @@ importers:
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
+      ollama:
+        specifier: ^0.5.12
+        version: 0.5.12
       table:
         specifier: ^6.9.0
         version: 6.9.0
@@ -70,6 +76,10 @@ packages:
 
   bitvavo@1.4.1:
     resolution: {integrity: sha512-DbQ6XSk1Qj26FQLDEX55OKYZ72td1h6gYwec1X9e1UVR9d4z8NTmtN6w5z2SUE3bf0hi2pEEp75/h+UofhOZHw==}
+
+  chalk@5.4.1:
+    resolution: {integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   cli-table@0.3.11:
     resolution: {integrity: sha512-IqLQi4lO0nIB4tcdTpN4LCB9FI3uqrJZK7RC515EnhZ6qBaglkIgICb1wjeAqpdoOabm1+SuQtkXIPdYC93jhQ==}
@@ -144,6 +154,9 @@ packages:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
+  ollama@0.5.12:
+    resolution: {integrity: sha512-flVH1fn1c9NF7VV3bW9kSu0E+bYc40b4DxL/gS2Debhao35osJFRDiPOj9sIWTMvcyj78Paw1OuhfIe7uhDWfQ==}
+
   require-from-string@2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
     engines: {node: '>=0.10.0'}
@@ -176,6 +189,9 @@ packages:
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
+
+  whatwg-fetch@3.6.20:
+    resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
 
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
@@ -255,6 +271,8 @@ snapshots:
       - encoding
       - utf-8-validate
 
+  chalk@5.4.1: {}
+
   cli-table@0.3.11:
     dependencies:
       colors: 1.0.3
@@ -312,6 +330,10 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
+  ollama@0.5.12:
+    dependencies:
+      whatwg-fetch: 3.6.20
+
   require-from-string@2.0.2: {}
 
   slice-ansi@4.0.0:
@@ -345,6 +367,8 @@ snapshots:
   web-streams-polyfill@3.3.3: {}
 
   webidl-conversions@3.0.1: {}
+
+  whatwg-fetch@3.6.20: {}
 
   whatwg-url@5.0.0:
     dependencies:

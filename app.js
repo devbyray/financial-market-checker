@@ -1,6 +1,8 @@
 import Bitvavo from 'bitvavo'
 import * as dateFns from 'date-fns'
 import table from 'cli-table'
+import chalk from 'chalk'
+import { analyzeMarketData } from './marketAnalyzer.js'
 
 const bitvavo = new Bitvavo()
 const euroFormatter = new Intl.NumberFormat('nl-NL', {
@@ -45,19 +47,19 @@ bitvavo.candles(
 		end: endTime.getTime(),
 		limit: 6 // Explicitly request 6 entries
 	},
-	(error, response) => {
+	async (error, response) => {
 		if (error === null) {
 			// Sort newest first but keep the oldest entry for diff calculation
 			const sortedResponse = response.sort((a, b) => b[0] - a[0])
 
 			// Get the oldest entry for initial diff calculation
-			let previousClose = sortedResponse[sortedResponse.length - 1][4]
+			const [, , , , previousClose] = sortedResponse[sortedResponse.length - 1]
 
 			// Take first 5 entries (newest entries including current hour)
 			const displayEntries = sortedResponse.slice(0, 5)
 
 			for (let entry of displayEntries) {
-				const currentClose = entry[4]
+				const [timestamp, open, high, low, currentClose, volume] = entry
 				let diffAmount = '-'
 				let diffPercent = '-'
 
@@ -65,29 +67,36 @@ bitvavo.candles(
 					const diff = currentClose - previousClose
 					const percentChange = (diff / previousClose) * 100
 					const sign = diff >= 0 ? '+' : ''
-					const color = diff >= 0 ? '\x1b[32m' : '\x1b[31m'
-					diffAmount = `${color}${sign}${euroFormatter.format(diff)}\x1b[0m`
-					diffPercent = `${color}${sign}${percentChange.toFixed(2)}%\x1b[0m`
+					const color = diff >= 0 ? chalk.green : chalk.red
+					diffAmount = color(`${sign}${euroFormatter.format(diff)}`)
+					diffPercent = color(`${sign}${sign}${percentChange.toFixed(2)}%`)
 				}
 
-				const date = new Date(entry[0])
+				const date = new Date(timestamp)
 				const formattedDate = dateFns.formatDistanceToNow(date, { addSuffix: true })
 
 				priceTable.push([
 					formattedDate,
-					euroFormatter.format(entry[1]),
-					euroFormatter.format(entry[2]),
-					euroFormatter.format(entry[3]),
-					euroFormatter.format(entry[4]),
+					euroFormatter.format(open),
+					euroFormatter.format(high),
+					euroFormatter.format(low),
+					euroFormatter.format(currentClose),
 					diffAmount,
 					diffPercent,
-					entry[5]
+					volume
 				])
-
-				previousClose = currentClose
 			}
 
 			console.log(priceTable.toString())
+
+			// Add AI analysis
+			console.log('\nAI Market Analysis:')
+			console.log(chalk.yellow('─'.repeat(50)))
+			process.stdout.write(chalk.blue('🤖 Processing market data... '))
+			const advice = await analyzeMarketData(sortedResponse)
+			process.stdout.write('\r' + ' '.repeat(50) + '\r') // Clear processing message
+			console.log(advice)
+			console.log(chalk.yellow('─'.repeat(50)))
 		} else {
 			console.log(error)
 		}
