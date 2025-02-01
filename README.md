@@ -1,5 +1,7 @@
 # Financial Market Checker
 
+Check the demo on [Youtube](https://youtu.be/lArQ83rFLwc).
+
 1. Install NodeJS
 2. In the terminal run `npm install`
 3. After that run `node app.js` and there should be a result like this:
