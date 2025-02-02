@@ -1,11 +1,41 @@
 import ollama from 'ollama'
 import chalk from 'chalk'
+import { config } from './config.js'
 
 function updateLoadingIndicator() {
 	process.stdout.write('.')
 }
 
+const adviceLevelPrompts = {
+	noob: `Explain in very simple terms, avoiding technical jargon. Focus on basic concepts and use analogies where possible. Include a brief explanation of what Bitcoin is and what affects its price.`,
+
+	normal: `Provide a balanced analysis using common trading terminology. Include both technical and fundamental factors in your recommendation.`,
+
+	expert: `Provide an in-depth technical analysis including key support/resistance levels, relevant technical indicators, market sentiment analysis, and macro-economic factors. Use advanced trading terminology.`
+}
+
+function getCryptoName(symbol) {
+	return symbol.split('-')[0] // Extracts 'BTC' from 'BTC-EUR'
+}
+
 export async function analyzeMarketData(marketData) {
+	const intervalLabels = {
+		'1m': 'minute',
+		'5m': '5 minutes',
+		'15m': '15 minutes',
+		'30m': '30 minutes',
+		'1h': 'hour',
+		'2h': '2 hours',
+		'4h': '4 hours',
+		'6h': '6 hours',
+		'8h': '8 hours',
+		'12h': '12 hours',
+		'1d': 'day'
+	}
+
+	const intervalLabel = intervalLabels[config.market.timeframe] || 'period'
+	const cryptoName = getCryptoName(config.market.symbol)
+
 	// Format all data points for analysis
 	const formattedData = marketData
 		.map(([timestamp, open, high, low, close, volume]) => ({
@@ -18,11 +48,12 @@ export async function analyzeMarketData(marketData) {
 		}))
 		.sort((a, b) => a.timestamp - b.timestamp) // Sort chronologically
 
-	const prompt = `As a financial expert, analyze this Bitcoin market data for the last ${formattedData.length} hours:
+	const prompt = `You are a financial expert providing advice in ${config.llm.language.toUpperCase()}. 
+Analyze this ${cryptoName} market data for the last ${formattedData.length} ${intervalLabel}s:
 
 ${formattedData
 	.map(
-		(data, index) => `Hour ${index + 1}:
+		(data, index) => `${intervalLabel.charAt(0).toUpperCase() + intervalLabel.slice(1)} ${index + 1}:
     - Time: ${data.timestamp.toISOString()}
     - Opening price: €${data.open}
     - Closing price: €${data.close}
@@ -33,8 +64,13 @@ ${formattedData
 	)
 	.join('\n')}
 
-Based on this complete dataset, provide a short but comprehensive recommendation if it's a good time to invest.
-Consider the price movement trends, volatility patterns, and volume changes across all hours.
+${(() => {
+	const basePrompt = adviceLevelPrompts[config.llm.adviceLevel] || adviceLevelPrompts.normal
+	return basePrompt.replace(/Bitcoin/g, cryptoName) // Replace any hardcoded "Bitcoin" with dynamic crypto name
+})()}
+
+Based on this complete dataset, provide a short but comprehensive recommendation if it's a good time to invest in ${cryptoName}.
+Consider the price movement trends, volatility patterns, and volume changes across all ${intervalLabel}s.
 Keep the answer under 150 words.`
 
 	try {
@@ -42,7 +78,7 @@ Keep the answer under 150 words.`
 		const startTime = performance.now()
 
 		const completion = await ollama.chat({
-			model: 'deepseek-r1:latest',
+			model: config.llm.model,
 			messages: [{ role: 'user', content: prompt }],
 			stream: false
 		})

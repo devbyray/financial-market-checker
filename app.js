@@ -3,6 +3,7 @@ import * as dateFns from 'date-fns'
 import table from 'cli-table'
 import chalk from 'chalk'
 import { analyzeMarketData } from './marketAnalyzer.js'
+import { config } from './config.js'
 
 const bitvavo = new Bitvavo()
 const euroFormatter = new Intl.NumberFormat('nl-NL', {
@@ -10,9 +11,30 @@ const euroFormatter = new Intl.NumberFormat('nl-NL', {
 	currency: 'EUR'
 })
 
-// Get exact timestamps for the last 5 hours plus current hour
-const endTime = dateFns.addHours(new Date(), 1) // Add 1 hour to include current hour
-const startTime = dateFns.subHours(endTime, 6) // Get 6 hours of data
+// Get exact timestamps based on configured timeframe
+const endTime = new Date()
+const startTime = (() => {
+	const intervals = {
+		'1m': () => dateFns.subMinutes(endTime, config.market.periods),
+		'5m': () => dateFns.subMinutes(endTime, config.market.periods * 5),
+		'15m': () => dateFns.subMinutes(endTime, config.market.periods * 15),
+		'30m': () => dateFns.subMinutes(endTime, config.market.periods * 30),
+		'1h': () => dateFns.subHours(endTime, config.market.periods),
+		'2h': () => dateFns.subHours(endTime, config.market.periods * 2),
+		'4h': () => dateFns.subHours(endTime, config.market.periods * 4),
+		'6h': () => dateFns.subHours(endTime, config.market.periods * 6),
+		'8h': () => dateFns.subHours(endTime, config.market.periods * 8),
+		'12h': () => dateFns.subHours(endTime, config.market.periods * 12),
+		'1d': () => dateFns.subDays(endTime, config.market.periods)
+	}
+
+	if (!intervals[config.market.timeframe]) {
+		console.error('Invalid timeframe, falling back to 1h')
+		return intervals['1h']()
+	}
+
+	return intervals[config.market.timeframe]()
+})()
 
 const priceTable = new table({
 	head: ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Diff', 'Diff %', 'Volume'],
@@ -40,12 +62,12 @@ const priceTable = new table({
 })
 
 bitvavo.candles(
-	'BTC-EUR',
-	'1h',
+	config.market.symbol,
+	config.market.timeframe,
 	{
 		start: startTime.getTime(),
 		end: endTime.getTime(),
-		limit: 6 // Explicitly request 6 entries
+		limit: config.market.periods
 	},
 	async (error, response) => {
 		if (error === null) {
