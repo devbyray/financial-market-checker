@@ -1,16 +1,30 @@
-export const config = {
-	// LLM Configuration
-	llm: {
-		model: 'llama3.2', // or 'llama2' or other Ollama models
-		adviceLevel: 'normal', // Options: 'noob', 'normal', 'expert'
-		language: 'en' // Options: 'en', 'nl', 'es', etc. (ISO 639-1 codes)
-	},
+import { parseCliArguments } from './cli.js'
 
-	// Market Data Configuration
+const defaultConfig = {
+	llm: {
+		model: 'llama3.2',
+		adviceLevel: 'normal',
+		language: 'en'
+	},
 	market: {
-		// Valid intervals: '1m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'
 		timeframe: '1d',
-		periods: 6, // Number of periods to fetch
-		symbol: 'BTC-EUR' // Trading pair
+		periods: 6,
+		symbol: 'BTC-EUR'
+	}
+}
+
+const args = parseCliArguments()
+
+// Merge CLI arguments with default config
+export const config = {
+	llm: {
+		model: args.llm || defaultConfig.llm.model,
+		adviceLevel: args.level || defaultConfig.llm.adviceLevel,
+		language: args.lang || defaultConfig.llm.language
+	},
+	market: {
+		timeframe: args.timeframe || defaultConfig.market.timeframe,
+		periods: defaultConfig.market.periods,
+		symbol: args.pair || defaultConfig.market.symbol
 	}
 }

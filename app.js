@@ -2,14 +2,34 @@ import Bitvavo from 'bitvavo'
 import * as dateFns from 'date-fns'
 import table from 'cli-table'
 import chalk from 'chalk'
+import readline from 'readline'
 import { analyzeMarketData } from './marketAnalyzer.js'
 import { config } from './config.js'
+import { saveToMarkdown } from './utils/saveMarkdown.js'
 
 const bitvavo = new Bitvavo()
 const euroFormatter = new Intl.NumberFormat('nl-NL', {
 	style: 'currency',
 	currency: 'EUR'
 })
+
+// Add this after the existing constants
+const configInfo = {
+	model: chalk.blue(config.llm.model),
+	language: chalk.yellow(config.llm.language.toUpperCase()),
+	level: chalk.green(config.llm.adviceLevel),
+	pair: chalk.magenta(config.market.symbol),
+	timeframe: chalk.cyan(config.market.timeframe)
+}
+
+console.log(chalk.bold('\nFinancial Market Checker Configuration:'))
+console.log('───────────────────────────────────────')
+console.log(`🤖 Model     : ${configInfo.model}`)
+console.log(`🌐 Language  : ${configInfo.language}`)
+console.log(`📊 Level     : ${configInfo.level}`)
+console.log(`💱 Pair      : ${configInfo.pair}`)
+console.log(`⏱️  Timeframe : ${configInfo.timeframe}`)
+console.log('───────────────────────────────────────\n')
 
 // Get exact timestamps based on configured timeframe
 const endTime = new Date()
@@ -109,7 +129,29 @@ bitvavo.candles(
 				])
 			}
 
-			console.log(priceTable.toString())
+			const tableString = priceTable.toString()
+			console.log(tableString)
+
+			// Generate Markdown-friendly table
+			const markdownTable = [
+				'| Timestamp | Open | High | Low | Close | Diff | Diff % | Volume |',
+				'|-----------|------|------|-----|-------|------|--------|--------|',
+				...displayEntries.map(entry => {
+					const [timestamp, open, high, low, currentClose, volume] = entry
+					const date = new Date(timestamp)
+					const formattedDate = dateFns.formatDistanceToNow(date, { addSuffix: true })
+					const diff = currentClose - previousClose
+					const percentChange = (diff / previousClose) * 100
+					const sign = diff >= 0 ? '+' : ''
+					const diffAmount = `${sign}${euroFormatter.format(diff)}`
+					const diffPercent = `${sign}${percentChange.toFixed(2)}%`
+					return `| ${formattedDate} | ${euroFormatter.format(open)} | ${euroFormatter.format(
+						high
+					)} | ${euroFormatter.format(low)} | ${euroFormatter.format(
+						currentClose
+					)} | ${diffAmount} | ${diffPercent} | ${volume} |`
+				})
+			].join('\n')
 
 			// Add AI analysis
 			console.log('\nAI Market Analysis:')
@@ -119,6 +161,29 @@ bitvavo.candles(
 			process.stdout.write('\r' + ' '.repeat(50) + '\r') // Clear processing message
 			console.log(advice)
 			console.log(chalk.yellow('─'.repeat(50)))
+
+			// Add save prompt
+			const rl = readline.createInterface({
+				input: process.stdin,
+				output: process.stdout
+			})
+
+			rl.question(chalk.blue('\nSave this analysis as Markdown? (y/N): '), async answer => {
+				if (answer.toLowerCase() === 'y') {
+					const savedFile = await saveToMarkdown(advice, config, markdownTable)
+					if (savedFile) {
+						console.log(chalk.green(`\nAnalysis saved to reports/${savedFile}`))
+					}
+				}
+				rl.close()
+				process.exit(0)
+			})
+
+			// Auto-close after 30 seconds if no input
+			setTimeout(() => {
+				rl.close()
+				process.exit(0)
+			}, 30000)
 		} else {
 			console.log(error)
 		}

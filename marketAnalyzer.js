@@ -48,9 +48,11 @@ export async function analyzeMarketData(marketData) {
 		}))
 		.sort((a, b) => a.timestamp - b.timestamp) // Sort chronologically
 
-	const prompt = `You are a financial expert providing advice in ${config.llm.language.toUpperCase()}. 
-Analyze this ${cryptoName} market data for the last ${formattedData.length} ${intervalLabel}s:
+	const prompt = `IMPORTANT: Please provide your complete analysis and advice in authentic ${config.llm.language.toUpperCase()} language only.
 
+You are a financial expert analyzing ${cryptoName} market data.
+
+[Data Analysis Section]
 ${formattedData
 	.map(
 		(data, index) => `${intervalLabel.charAt(0).toUpperCase() + intervalLabel.slice(1)} ${index + 1}:
@@ -64,6 +66,7 @@ ${formattedData
 	)
 	.join('\n')}
 
+[Analysis Instructions]
 ${(() => {
 	const basePrompt = adviceLevelPrompts[config.llm.adviceLevel] || adviceLevelPrompts.normal
 	return basePrompt.replace(/Bitcoin/g, cryptoName) // Replace any hardcoded "Bitcoin" with dynamic crypto name
@@ -71,7 +74,9 @@ ${(() => {
 
 Based on this complete dataset, provide a short but comprehensive recommendation if it's a good time to invest in ${cryptoName}.
 Consider the price movement trends, volatility patterns, and volume changes across all ${intervalLabel}s.
-Keep the answer under 150 words.`
+Keep the answer under 150 words.
+
+Remember: Your entire response MUST be in ${config.llm.language.toUpperCase()} language.`
 
 	try {
 		const loadingInterval = setInterval(updateLoadingIndicator, 500)

@@ -17,6 +17,7 @@
 		"date-fns": "^4.1.0",
 		"node-fetch": "^3.3.2",
 		"ollama": "^0.5.12",
-		"table": "^6.9.0"
+		"table": "^6.9.0",
+		"minimist": "^1.2.8"
 	}
 }
