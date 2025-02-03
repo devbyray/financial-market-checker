@@ -1,4 +1,4 @@
-import { parseCliArguments } from './cli.js'
+import { parseCliArguments } from './utils/cli.js'
 
 const defaultConfig = {
 	llm: {

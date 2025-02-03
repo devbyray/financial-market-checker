@@ -1,6 +1,6 @@
 import ollama from 'ollama'
 import chalk from 'chalk'
-import { config } from './config.js'
+import { config } from '../config.js'
 
 function updateLoadingIndicator() {
 	process.stdout.write('.')
