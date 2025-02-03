@@ -52,6 +52,10 @@ You can also provide options via the terminal:
 -   `node app.js --symbol ETH-USD --timeframe 1d --periods 7 --adviceLevel expert`
 -   `node app.js --symbol LTC-EUR --timeframe 4h --periods 12 --language nl`
 
+## Reports
+
+An example of a report can be found in the [reports folder](./reports/2025-02-03_BTC-EUR_en.md).
+
 ## Example Output
 
 ```
